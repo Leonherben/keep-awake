@@ -1,0 +1,27 @@
+[package]
+name = "keep-awake"
+version = "0.1.0"
+edition = "2024"
+authors = ["LeonHerben <herberten16@gmail.com>"]
+description = "Ultra-lightweight sleep and display inhibitor daemon for Linux and Windows"
+license = "MIT"
+repository = "https://github.com/LeonHerben/keep-awake"
+
+[dependencies]
+clap = { version = "4.6.7", features = ["derive"] }
+tokio = { version = "1.53.2", features = ["full"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+ksni = { version = "0.3.6", features = ["tokio"] }
+notify-rust = "4.18.1"
+zbus = "5.19.0"
+
+[target.'cfg(target_os = "windows")'.dependencies]
+tray-item = "0.10"
+windows-sys = { version = "0.59", features = [
+    "Win32_System_Power",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_UI_Shell",
+    "Win32_Foundation",
+    "Win32_System_Threading",
+] }
