@@ -2,6 +2,7 @@ use std::process::Command;
 use std::time::Instant;
 use tokio::sync::mpsc::UnboundedSender;
 use tray_item::{IconSource, TrayItem};
+use windows_sys::Win32::UI::WindowsAndMessaging::{LoadIconW, IDI_APPLICATION};
 
 pub struct TrayHandleWrapper {
     _tray: Option<TrayItem>,
@@ -35,10 +36,15 @@ pub async fn spawn_tray(
     start_time: Instant,
     quit_tx: UnboundedSender<()>,
 ) -> Result<TrayHandleWrapper, Box<dyn std::error::Error + Send + Sync>> {
-    let mut tray = match TrayItem::new("保持常亮助手", IconSource::Resource("app-icon")) {
-        Ok(t) => t,
-        Err(_) => TrayItem::new("保持常亮助手", IconSource::Resource("1"))?,
-    };
+    // 优先级 1: 尝试由 winres 嵌入的 PE 资源图标 ("app-icon")
+    // 优先级 2: 尝试资源 ID 1
+    // 优先级 3: 兜底使用 Windows 系统默认应用图标 (IDI_APPLICATION)，确保 100% 成功显现
+    let mut tray = TrayItem::new("保持常亮助手", IconSource::Resource("app-icon"))
+        .or_else(|_| TrayItem::new("保持常亮助手", IconSource::Resource("1")))
+        .or_else(|_| {
+            let sys_icon = unsafe { LoadIconW(0, IDI_APPLICATION) };
+            TrayItem::new("保持常亮助手", IconSource::RawIcon(sys_icon as _))
+        })?;
 
     let _ = tray.add_label("🟢 保持常亮运行中");
 
