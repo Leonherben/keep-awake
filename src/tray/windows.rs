@@ -42,7 +42,7 @@ pub async fn spawn_tray(
     let mut tray = TrayItem::new("保持常亮助手", IconSource::Resource("app-icon"))
         .or_else(|_| TrayItem::new("保持常亮助手", IconSource::Resource("1")))
         .or_else(|_| {
-            let sys_icon = unsafe { LoadIconW(0, IDI_APPLICATION) };
+            let sys_icon = unsafe { LoadIconW(std::ptr::null_mut(), IDI_APPLICATION) };
             TrayItem::new("保持常亮助手", IconSource::RawIcon(sys_icon as _))
         })?;
 
